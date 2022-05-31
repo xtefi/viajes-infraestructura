@@ -7,6 +7,31 @@ resource "aws_instance" "ec2-eventsdava" {
   tags = {
       Name = "Eventsdava-ec2"
   }
+  provisioner "file" {
+    source = "./scripts/linuxconfig.sh"
+    destination = "/tmp/linuxconfig.sh"
+    connection {
+        type     = "ssh"
+        user     = "ec2-user"
+        password = "asd"
+        host     = self.public_ip
+        private_key = "${file("../eventsdava.pem")}"
+    }
+
+  }
+    provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/linuxconfig.sh",
+      "/tmp/linuxconfig.sh"
+    ]
+        connection {
+        type     = "ssh"
+        user     = "ec2-user"
+        password = "asd"
+        host     = self.public_ip
+        private_key = "${file("../eventsdava.pem")}"
+    }
+  }
 }
 
 data "aws_ami" "amazon-linux-eventsdava" {
@@ -18,6 +43,8 @@ data "aws_ami" "amazon-linux-eventsdava" {
     owners = ["amazon"]
   
 }
+
+
 
 resource "aws_security_group" "eventsdavasg" {
     name = "eventsdava-sg"
